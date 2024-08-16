@@ -3,12 +3,28 @@ import { useState } from "react";
 export default function Calculator() {
   const [input, setInput] = useState("");
   const [result, setResult] = useState("");
+  const [mathProblem, setMathProblem] = useState(generateMathProblem());
+  const [userAnswer, setUserAnswer] = useState("");
 
   const handleInputChange = (e) => {
     setInput(e.target.value);
   };
 
+  const generateMathProblem = () => {
+    const num1 = Math.floor(Math.random() * 10) + 1;
+    const num2 = Math.floor(Math.random() * 10) + 1;
+    return { num1, num2, answer: num1 + num2 };
+  };
+
+  const handleUserAnswerChange = (e) => {
+    setUserAnswer(e.target.value);
+  };
+
   const calculate = async () => {
+    if (parseInt(userAnswer) !== mathProblem.answer) {
+      setResult("Incorrect answer to the math problem.");
+      return;
+    }
     try {
       const response = await fetch("/api/calculate", {
         method: "POST",
@@ -31,6 +47,16 @@ export default function Calculator() {
         value={input}
         onChange={handleInputChange}
         placeholder="Enter calculation"
+        className="input"
+      />
+      <div className="math-problem">
+        Solve this to proceed: {mathProblem.num1} + {mathProblem.num2} = ?
+      </div>
+      <input
+        type="text"
+        value={userAnswer}
+        onChange={handleUserAnswerChange}
+        placeholder="Your answer"
         className="input"
       />
       <button onClick={calculate} className="button">
