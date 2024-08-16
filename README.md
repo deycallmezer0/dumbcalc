@@ -12,13 +12,11 @@ The Glitchy Calculator is a 3D, moving calculator that challenges users to solve
 
 1. **3D Moving Interface**: The calculator floats and rotates in 3D space, adding an element of challenge to simple calculations.
 
-2. **Floating Title**: A "Glitchy Calculator" title hovers above the calculator, swaying and rotating for added visual interest.
+2. **Math Challenges**: Before revealing the result of a calculation, users must solve a randomly generated math problem.
 
-3. **Math Challenges**: Before revealing the result of a calculation, users must solve a randomly generated math problem.
+3. **Streak System**: Keep track of how many challenges you've solved correctly in a row.
 
-4. **Streak System**: Keep track of how many challenges you've solved correctly in a row.
-
-5. **Error Handling**: Provides feedback for incorrect answers and invalid calculations.
+4. **Error Handling**: Provides feedback for incorrect answers and invalid calculations.
 
 ## Technology Stack
 
