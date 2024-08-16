@@ -46,25 +46,25 @@ const Calculator = ({ setDisplay, handleCalculate, handleClear }) => {
         repeat: Infinity
       }}
     >
-      <Box args={[3.2, 4, 0.2]} position={[0, 0, 0]}>
-        <meshStandardMaterial color="gray" />
+      <Box args={[3.5, 4.5, 0.3]} position={[0, 0, 0]}>
+        <meshPhongMaterial color="#2c3e50" shininess={100} />
       </Box>
       {buttons.flat().map((btn, index) => (
         <Box
           key={index}
-          args={[0.6, 0.6, 0.1]}
+          args={[0.7, 0.7, 0.1]}
           position={[
-            (index % 4 - 1.5) * 0.7,
-            (Math.floor(index / 4) - 1.5) * 0.7,
-            0.15
+            (index % 4 - 1.5) * 0.8,
+            (Math.floor(index / 4) - 1.5) * 0.8,
+            0.2
           ]}
           onClick={() => btn === '=' ? handleCalculate() : setDisplay(prev => prev + btn)}
         >
-          <meshStandardMaterial color="white" />
+          <meshPhongMaterial color="#ecf0f1" shininess={100} />
           <Text
             position={[0, 0, 0.06]}
-            fontSize={0.3}
-            color="black"
+            fontSize={0.35}
+            color="#2c3e50"
             anchorX="center"
             anchorY="middle"
           >
@@ -73,15 +73,15 @@ const Calculator = ({ setDisplay, handleCalculate, handleClear }) => {
         </Box>
       ))}
       <Box
-        args={[2.8, 0.6, 0.1]}
-        position={[0, 1.8, 0.15]}
+        args={[3.1, 0.7, 0.1]}
+        position={[0, 2, 0.2]}
         onClick={handleClear}
       >
-        <meshStandardMaterial color="red" />
+        <meshPhongMaterial color="#e74c3c" shininess={100} />
         <Text
           position={[0, 0, 0.06]}
-          fontSize={0.3}
-          color="white"
+          fontSize={0.35}
+          color="#ffffff"
           anchorX="center"
           anchorY="middle"
         >
@@ -91,7 +91,6 @@ const Calculator = ({ setDisplay, handleCalculate, handleClear }) => {
     </motion.group>
   );
 };
-
 const MathChallengeCalculator = () => {
   const [display, setDisplay] = useState('');
   const [challenge, setChallenge] = useState(generateChallenge());
@@ -99,6 +98,8 @@ const MathChallengeCalculator = () => {
   const [showChallenge, setShowChallenge] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
+  const [resultTimeout, setResultTimeout] = useState(null);
+  const [errorTimeout, setErrorTimeout] = useState(null);
 
   useEffect(() => {
     if (showChallenge) {
@@ -106,7 +107,13 @@ const MathChallengeCalculator = () => {
     }
   }, [showChallenge]);
 
+  const clearTimeouts = () => {
+    if (resultTimeout) clearTimeout(resultTimeout);
+    if (errorTimeout) clearTimeout(errorTimeout);
+  };
+
   const handleCalculate = useCallback(() => {
+    clearTimeouts();
     setShowChallenge(true);
     setUserAnswer('');
     setResult(null);
@@ -114,6 +121,7 @@ const MathChallengeCalculator = () => {
   }, []);
 
   const handleClear = useCallback(() => {
+    clearTimeouts();
     setDisplay('');
     setShowChallenge(false);
     setUserAnswer('');
@@ -122,71 +130,77 @@ const MathChallengeCalculator = () => {
   }, []);
 
   const handleChallengeSubmit = useCallback(() => {
+    clearTimeouts();
     if (parseFloat(userAnswer) === challenge.answer) {
       try {
         const calculationResult = eval(display);
         setResult(calculationResult);
         setShowChallenge(false);
+        const timeout = setTimeout(() => setResult(null), 5000);
+        setResultTimeout(timeout);
       } catch (err) {
         setError('Invalid calculation. Please try again.');
+        const timeout = setTimeout(() => setError(''), 5000);
+        setErrorTimeout(timeout);
       }
     } else {
       setError('Incorrect. Try again!');
       setUserAnswer('');
+      const timeout = setTimeout(() => setError(''), 5000);
+      setErrorTimeout(timeout);
     }
   }, [challenge.answer, display, userAnswer]);
 
+  useEffect(() => {
+    return () => clearTimeouts();
+  }, []);
+
   return (
-    <div style={{ width: '100vw', height: '100vh' }}>
-      <Canvas camera={{ position: [0, 0, 5] }}>
-        <ambientLight intensity={0.5} />
-        <pointLight position={[10, 10, 10]} />
-        <Calculator
-          setDisplay={setDisplay}
-          handleCalculate={handleCalculate}
-          handleClear={handleClear}
-        />
-      </Canvas>
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        padding: '20px',
-        color: 'white',
-        backgroundColor: 'rgba(0,0,0,0.7)',
-        borderRadius: '0 0 10px 0'
-      }}>
-        Display: {display}
+    <div className="w-screen h-screen bg-gradient-to-br from-blue-500 to-purple-600 flex flex-col items-center justify-center font-sans">
+      <div className="text-center mb-8">
+        <h1 className="text-5xl font-bold text-white mb-2">Dumb Calculator</h1>
+        <p className="text-xl text-white mb-1">Created for the Hackathon with Lewis</p>
+        <p className="text-lg text-white">Created by: Chris Holmes</p>
       </div>
+      
+      <div className="w-[500px] h-[500px] relative">
+        <Canvas camera={{ position: [0, 0, 6] }}>
+          <ambientLight intensity={0.5} />
+          <pointLight position={[10, 10, 10]} intensity={1} />
+          <Calculator
+            setDisplay={setDisplay}
+            handleCalculate={handleCalculate}
+            handleClear={handleClear}
+          />
+        </Canvas>
+        <div className="absolute top-4 left-4 bg-white bg-opacity-80 p-2 rounded">
+          Display: {display}
+        </div>
+      </div>
+
       {showChallenge && (
-        <div style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          padding: '20px',
-          backgroundColor: 'white',
-          borderRadius: '10px',
-          width: '300px'
-        }}>
-          <p>Solve this: {challenge.question}</p>
+        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg shadow-lg w-80">
+          <p className="text-lg font-semibold mb-4">Solve this: {challenge.question}</p>
           <Input
             type="number"
             placeholder="Your answer"
             value={userAnswer}
             onChange={(e) => setUserAnswer(e.target.value)}
+            className="mb-4"
           />
-          <Button onClick={handleChallengeSubmit} className="mt-2 w-full">Submit</Button>
-          <Button onClick={() => setShowChallenge(false)} className="mt-2 w-full">Close</Button>
+          <Button onClick={handleChallengeSubmit} className="w-full mb-2">Submit</Button>
+          <Button onClick={() => setShowChallenge(false)} variant="outline" className="w-full">Close</Button>
         </div>
       )}
+      
       {result !== null && (
-        <Alert className="fixed bottom-4 right-4 w-auto">
+        <Alert className="fixed bottom-4 right-4 w-auto bg-green-100 border-green-400 text-green-700">
           <AlertDescription>
             Your calculation result is: {result}
           </AlertDescription>
         </Alert>
       )}
+      
       {error && (
         <Alert variant="destructive" className="fixed bottom-4 right-4 w-auto">
           <AlertDescription>{error}</AlertDescription>
